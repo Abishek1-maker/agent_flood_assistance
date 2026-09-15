@@ -3,9 +3,9 @@ terminal -> for 1st and second demo
 -> python3 app.py
 
 
-* **`google-genai`**: Official Google SDK to connect to and generate content from Gemini AI models.
-* **`gradio`**: Build and serve the web user interface (chat window, dropdowns, and layouts).
-* **`gradio-client`**: Required backend utility for handling Gradio API routing and UI event streams.
-* **`pydantic==2.10.6`**: Prevents schema generation crashes (`TypeError: argument of type 'bool' is not iterable`) between Gradio and Pydantic.
-* **`python-dotenv`**: Loads secret variables (like `GEMINI_API_KEY`) securely from a local `.env` file into Python.
-* **`markdown`**: Converts AI Markdown responses (bullet points, bold text) into clean HTML for custom visual display.
+* `pip3 install google-genai`: Connects your app to Google's Gemini models for generating disaster responses.
+* `pip3 install gradio`: Builds the web interface (chat windows, dropdowns, and layouts).
+* `pip3 install gradio-client`: Manages internal backend event streams and web sockets for Gradio UI components.
+* `pip3 install pydantic==2.10.6`: Locks a stable data-validation version to prevent schema crashes with Gradio.
+* `pip3 install python-dotenv`: Reads your secret `GEMINI_API_KEY` securely from the `.env` file into Python.
+* `pip3 install markdown`: Converts raw AI text (like bullet points and **bold** words) into clean HTML for display.
