@@ -31,7 +31,7 @@ body, .gradio-container {
 
 /* Map area */
 #map_placeholder {
-    background: #1E293B;
+    background: #F8FAFC;
     border: 1px solid #334155;
     height: 98vh;
     display: flex;
@@ -41,21 +41,29 @@ body, .gradio-container {
     font-size: 16px;
 }
 
-/* Sidebar styling */
+/* Fixed-width sidebar styling */
 #chat_panel {
     background: #111827 !important;
     border-left: 1px solid #1F2937 !important;
     padding: 10px !important;
     height: 98vh !important;
+    width: 240px !important;
+    min-width: 240px !important;
+    max-width: 240px !important;
+    flex-grow: 0 !important;
 }
 
-/* Header & Compact Language Dropdown FIX */
-.chat-header-row {
+/* Header row - alignment to the right */
+.chat-header-row,
+.chat-header-row .block,
+.chat-header-row .form {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 0 8px 0 !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 5px !important;
-    margin-bottom: 8px !important;
+    justify-content: flex-end !important;
 }
 
 .chat-header-title {
@@ -65,39 +73,44 @@ body, .gradio-container {
     white-space: nowrap !important;
 }
 
-/* Kills Gradio wrapper wasted space for dropdown */
-/* Real-world compact rectangle dropdown fix */
-.lang-dropdown-wrapper {
-    width: 55px !important;
-    min-width: 55px !important;
-    max-width: 55px !important;
-    margin: 0 !important;
+/* 1. Sets outer container to white and shrinks width */
+.lang-dropdown-wrapper,
+.lang-dropdown-wrapper .block {
+    background: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
     padding: 0 !important;
-    flex-grow: 0 !important;
+    margin-left: auto !important;
+    width: fit-content !important;
+    min-width: unset !important;
+    border-radius: 8px !important;
 }
 
-.lang-dropdown-wrapper .form, 
-.lang-dropdown-wrapper .block,
-.lang-dropdown-wrapper .wrap {
+/* 2. Sets all internal wrappers to white */
+.lang-dropdown-wrapper div,
+.lang-dropdown-wrapper .form,
+.lang-dropdown-wrapper .wrap,
+.lang-dropdown-wrapper .secondary-wrap {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    box-shadow: none !important;
-    min-height: unset !important;
+    width: fit-content !important;
+    min-width: unset !important;
 }
-
-.lang-dropdown-wrapper select {
-    background: #1F2937 !important;
-    border: 1px solid #374151 !important;
-    color: #9CA3AF !important;
-    padding: 2px 4px !important;
+/* Compact white EN badge */
+.lang-dropdown-wrapper select,
+.lang-dropdown-wrapper input {
+    background-color: #6e86cf !important;
+    border: 1px solid transparent !important;
+    color: #FFFFFF !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
-    border-radius: 4px !important;
-    height: 24px !important;
-    min-height: 24px !important;
-    width: 100% !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    height: 26px !important;
+    width: 55px !important;
     cursor: pointer !important;
 }
 
@@ -131,7 +144,6 @@ body, .gradio-container {
 """
 
 def toggle_sidebar(visible_state):
-    # Toggles visibility boolean cleanly
     return gr.update(visible=not visible_state), not visible_state
 
 def respond(message, history, language):
@@ -142,33 +154,29 @@ def respond(message, history, language):
     return "", history
 
 with gr.Blocks(css=custom_css, title="Pravah AI Risk Intelligence") as demo:
-    # State tracking sidebar state (Starts Hidden = False)
     sidebar_visible = gr.State(False)
 
-    # Absolute Top-Left Floating Toggle Button
     toggle_btn = gr.Button("🟠 Pravah AI", elem_id="toggle_btn_overlay")
 
     with gr.Row(equal_height=True):
-        # Map Column (100% width by default when sidebar is hidden)
         with gr.Column(scale=5, min_width=200) as map_column:
             gr.HTML('<div id="map_placeholder">📍 Interactive Map (Full View Area)</div>')
 
-        # Sidebar Chat Panel (Hidden by default)
-        with gr.Column(scale=1, min_width=240, visible=False, elem_id="chat_panel") as chat_column:
+        with gr.Column(scale=0, min_width=240, visible=False, elem_id="chat_panel") as chat_column:
             
-            # Header Row
-            with gr.Row(elem_classes=["chat-header-row"]):
+            # Header Row without default grey container
+            with gr.Row(elem_classes=["chat-header-row"], container=False):
                 lang = gr.Dropdown(
-                    choices=["ENGLISH", "NEPALI", "HINDI", "CHINESE"],
+                    choices=["EN", "NE", "HI", "ZH"],
                     value="EN",
                     show_label=False,
                     container=False,
+                    scale=0,
                     elem_classes=["lang-dropdown-wrapper"]
                 )
             
             chatbot = gr.Chatbot(height=520, show_label=False)
 
-            # Clean Input Bar
             with gr.Row():
                 msg = gr.Textbox(
                     placeholder="Ask weather or risk...",
@@ -182,7 +190,6 @@ with gr.Blocks(css=custom_css, title="Pravah AI Risk Intelligence") as demo:
             send.click(respond, inputs=[msg, chatbot, lang], outputs=[msg, chatbot])
             msg.submit(respond, inputs=[msg, chatbot, lang], outputs=[msg, chatbot])
 
-    # Dynamic Toggle Handler
     toggle_btn.click(
         fn=toggle_sidebar,
         inputs=[sidebar_visible],
