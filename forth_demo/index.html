@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pravah AI Risk Intelligence</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      .msg.loading {
+        align-self: flex-start;
+        background-color: #1f2937;
+        color: #9ca3af;
+        font-style: italic;
+        border-bottom-left-radius: 2px;
+      }
+      body {
+        background-color: #0f172a;
+        color: #f8fafc;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+
+      /* Toggle Button */
+      #toggle_btn {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 9999;
+        background-color: #ea580c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      /* Map Area */
+      #map_placeholder {
+        flex-grow: 1;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 16px;
+        border-right: 1px solid #334155;
+      }
+
+      /* Sidebar Styling */
+      #chat_panel {
+        width: 240px;
+        min-width: 240px;
+        max-width: 600px;
+        height: 100vh;
+        background: #111827;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding: 12px;
+        transition: transform 0.2s ease;
+      }
+
+      #chat_panel.hidden {
+        display: none;
+      }
+
+      /* Real Draggable Handle */
+      #resizer_handle {
+        position: absolute;
+        left: -4px;
+        top: 0;
+        width: 8px;
+        height: 100%;
+        cursor: col-resize;
+        z-index: 100;
+      }
+      #resizer_handle:hover,
+      #resizer_handle.dragging {
+        background: #2563eb;
+      }
+
+      /* Header Row */
+      .chat-header-row {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 8px !important;
+        border-bottom: 1px solid #1f2937 !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      .lang-select {
+        background-color: #6e86cf !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 4px 12px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        height: 32px !important;
+        min-width: 95px !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        cursor: pointer !important;
+        outline: none !important;
+      }
+      /* Chat Messages Box */
+      #chat_history {
+        flex-grow: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-top: 4px;
+        padding-right: 4px;
+      }
+
+      .msg {
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .msg.user {
+        align-self: flex-end;
+        background-color: #2563eb;
+        color: #ffffff;
+        border-bottom-right-radius: 2px;
+      }
+
+      .msg.bot {
+        align-self: flex-start;
+        background-color: #1f2937;
+        color: #f3f4f6;
+        border-bottom-left-radius: 2px;
+      }
+
+      /* Unified Gemini Pill Bar */
+      .pill-input-row {
+        background: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        padding: 4px 8px 4px 14px;
+        gap: 8px;
+      }
+
+      .pill-input-row input {
+        flex-grow: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #f3f4f6;
+        font-size: 13px;
+      }
+
+      .send-btn {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="toggle_btn">🟠 Pravah AI</button>
+
+    <div id="map_placeholder">📍 Interactive Map (Full View Area)</div>
+
+    <div id="chat_panel" class="hidden">
+      <div id="resizer_handle"></div>
+
+      <select id="lang_select" class="lang-select">
+        <option value="English">English</option>
+        <option value="Nepali">Nepali</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Chinese">Chinese</option>
+      </select>
+
+      <div id="chat_history"></div>
+
+      <div class="pill-input-row">
+        <input
+          type="text"
+          id="user_input"
+          placeholder="Ask weather or risk..."
+        />
+        <button id="send_btn" class="send-btn">⬆</button>
+      </div>
+    </div>
+
+    <script>
+      const chatPanel = document.getElementById("chat_panel");
+      const toggleBtn = document.getElementById("toggle_btn");
+      const resizer = document.getElementById("resizer_handle");
+      const sendBtn = document.getElementById("send_btn");
+      const userInput = document.getElementById("user_input");
+      const chatHistory = document.getElementById("chat_history");
+      const langSelect = document.getElementById("lang_select");
+
+      let history = [];
+
+      // Toggle Sidebar Visibility
+      toggleBtn.addEventListener("click", () => {
+        chatPanel.classList.toggle("hidden");
+      });
+
+      // Smooth Mouse Dragging Logic
+      let isResizing = false;
+
+      resizer.addEventListener("mousedown", (e) => {
+        isResizing = true;
+        resizer.classList.add("dragging");
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isResizing) return;
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth >= 240 && newWidth <= 600) {
+          chatPanel.style.width = newWidth + "px";
+        }
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (isResizing) {
+          isResizing = false;
+          resizer.classList.remove("dragging");
+          document.body.style.cursor = "default";
+          document.body.style.userSelect = "auto";
+        }
+      });
+
+      // Send Message Handler
+      // REPLACE THIS FUNCTION COMPLETELY
+      let isGenerating = false;
+
+      async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message || isGenerating) return;
+
+        // 1. Lock generation state & send button (keep text input ACTIVE)
+        isGenerating = true;
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = "0.4";
+        sendBtn.style.cursor = "not-allowed";
+
+        // 2. Append User Message & clear input
+        appendMessage(message, "user");
+        userInput.value = "";
+
+        // 3. Show "Thinking..." buffering message
+        const loadingDiv = document.createElement("div");
+        loadingDiv.className = "msg loading";
+        loadingDiv.textContent = "Pravah AI is responsing...";
+        chatHistory.appendChild(loadingDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: message,
+              history: history,
+              language: langSelect.value,
+            }),
+          });
+
+          const data = await res.json();
+
+          // 4. Remove loading indicator & display bot answer
+          if (chatHistory.contains(loadingDiv)) {
+            chatHistory.removeChild(loadingDiv);
+          }
+          appendMessage(data.response, "bot");
+          history.push([message, data.response]);
+        } catch (err) {
+          if (chatHistory.contains(loadingDiv)) {
+            chatHistory.removeChild(loadingDiv);
+          }
+          appendMessage("Error communicating with AI engine.", "bot");
+        } finally {
+          // 5. Unlock send button for the next message
+          isGenerating = false;
+          sendBtn.disabled = false;
+          sendBtn.style.opacity = "1";
+          sendBtn.style.cursor = "pointer";
+        }
+      }
+
+      function appendMessage(text, sender) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `msg ${sender}`;
+        msgDiv.textContent = text;
+        chatHistory.appendChild(msgDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+    </script>
+  </body>
+</html>
