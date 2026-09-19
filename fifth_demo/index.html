@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pravah AI Risk Intelligence</title>
+
+    <!-- Leaflet CSS CDN -->
+    <link 
+      rel="stylesheet" 
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin="" 
+    />
+
+    <!-- Custom Modular CSS -->
+       <link rel="stylesheet" href="/static/style.css" />
+
+  </head>
+  <body>
+
+    <!-- ======================================================================
+       1. MAP CONTROLS & SIDEBAR TOGGLE
+       ====================================================================== -->
+    <button id="toggle_btn">🟠 Pravah AI</button>
+
+    <!-- Main Map Container -->
+    <div id="map"></div>
+
+    <!-- ======================================================================
+       2. AI CHAT SIDEBAR PANEL
+       ====================================================================== -->
+    <div id="chat_panel" class="hidden">
+      <!-- Drag handle for panel resizing -->
+      <div id="resizer_handle"></div>
+
+      <!-- Header with Language Selector -->
+      <div class="chat-header-row">
+        <select id="lang_select" class="lang-select">
+          <option value="English">English</option>
+          <option value="Nepali">Nepali</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Chinese">Chinese</option>
+        </select>
+      </div>
+
+      <!-- Dynamic Chat Message Feed -->
+      <div id="chat_history"></div>
+
+      <!-- User Text Input Pill -->
+      <div class="pill-input-row">
+        <input type="text" id="user_input" placeholder="Ask weather or risk..." />
+        <button id="send_btn" class="send-btn">⬆</button>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+       3. JS SCRIPTS INITIALIZATION
+       ====================================================================== -->
+    <!-- Leaflet JS CDN -->
+    <script 
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+      crossorigin="">
+    </script>
+
+    <!-- App Logic Script -->
+<script src="/static/script.js"></script>  </body>
+</html>
